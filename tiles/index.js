@@ -70,6 +70,10 @@ var map;
 var tweets = [];
 var gMarkers = [];
 var range = "1000";
+var dummyData = [];
+dummyData.push(40.804826, -73.966101);
+dummyData.push(40.805508, -73.963794);
+dummyData.push(40.803730, -73.965682);
 
 function initMap() {
     $(function(){
@@ -82,19 +86,9 @@ function initMap() {
         center: {lat: 40.8052, lng: -73.9640652},
         zoom: 16
     });
-    google.maps.event.addListener(map, "click", function(event) {
-        var lat = event.latLng.lat();
-        var lng = event.latLng.lng();
-        console.log("Lat=" + lat + "; Lng=" + lng + "; Range= " + range);
-        map.clearOverlays();
-        $.post(locationURL, {candidate: currentCandidate, lat: lat, lng: lng, range: range}, function(data){
-            mapTweets(data);
-        });
-    });
-    // fetch all tweets
-    $.post(tweetsURL, {candidate: currentCandidate}, function(data){
-        mapTweets(data);
-    });
+
+
+
     // delete marker function
     google.maps.Map.prototype.clearOverlays = function() {
         for (var i = 0; i < gMarkers.length; i++ ) {
@@ -102,4 +96,36 @@ function initMap() {
         }
         gMarkers = [];
     }
+    google.maps.Map.prototype.createMarkers = function() {
+        dummyData.forEach(function(location) {
+            console.log("test");
+            var position_options = {
+                lat: parseFloat(location[0]),
+                lng: parseFloat(location[1])
+            };
+            var marker = new google.maps.Marker({
+                position: position_options,
+                map: map
+            });
+        });
+    }
+    var a = new google.maps.LatLng(40.804826, -73.966101);
+    var b = new google.maps.LatLng(40.805508, -73.963794);
+    var c = new google.maps.LatLng(40.803730, -73.965682);
+
+    var marker = new google.maps.Marker({
+      position: a,
+      map: map,
+      title: 'Hello World!'
+    });
+    var marker = new google.maps.Marker({
+      position: b,
+      map: map,
+      title: 'Hello World!'
+    });
+    var marker = new google.maps.Marker({
+      position: c,
+      map: map,
+      title: 'Hello World!'
+    });
 }

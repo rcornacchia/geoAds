@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+  <style>
+  .container{
+      margin-top:20px;
+  }
+  .image-preview-input {
+      position: relative;
+  	overflow: hidden;
+  	margin: 0px;
+      color: #333;
+      background-color: #fff;
+      border-color: #ccc;
+  }
+  .image-preview-input input[type=file] {
+  	position: absolute;
+  	top: 0;
+  	right: 0;
+  	margin: 0;
+  	padding: 0;
+  	font-size: 20px;
+  	cursor: pointer;
+  	opacity: 0;
+  	filter: alpha(opacity=0);
+  }
+  .image-preview-input-title {
+      margin-left:2px;
+  }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Create Ad</h2>
+  <form class="form-horizontal" role="form">
+    <div class="form-group">
+    </div>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="pwd">Title:</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="pwd" placeholder="Enter title for ad">
+      </div>
+
+      <label class="control-label col-sm-2" for="pwd">Discount:</label>
+      <div class="col-sm-10">
+        <input type="password" class="form-control" id="pwd" placeholder="Enter discount amount">
+      </div>
+
+      <label class="control-label col-sm-2" for="pwd">Number of Ads:</label>
+      <div class="col-sm-10">
+        <input type="password" class="form-control" id="pwd" placeholder="Enter the number of ads to serve">
+      </div>
+
+      <label class="control-label col-sm-2" for="pwd">Expiration</label>
+      <div class="col-sm-10">
+        <input type="password" class="form-control" id="pwd" placeholder="Enter the number of minutes before these ads expire">
+      </div>
+
+      <label class="control-label col-sm-2" for="pwd">Upload picture:</label>
+      <div class="col-sm-10">
+                  <!-- image-preview-filename input [CUT FROM HERE]-->
+                  <div class="input-group image-preview">
+                      <input type="text" class="form-control image-preview-filename" disabled="disabled"> <!-- don't give a name === doesn't send on POST/GET -->
+                      <span class="input-group-btn">
+                          <!-- image-preview-clear button -->
+                          <button type="button" class="btn btn-default image-preview-clear" style="display:none;">
+                              <span class="glyphicon glyphicon-remove"></span> Clear
+                          </button>
+                          <!-- image-preview-input -->
+                          <div class="btn btn-default image-preview-input">
+                              <span class="glyphicon glyphicon-folder-open"></span>
+                              <span class="image-preview-input-title">Browse</span>
+                              <input type="file" accept="image/png, image/jpeg, image/gif" name="input-file-preview"/> <!-- rename it -->
+                          </div>
+                      </span>
+                  </div><!-- /input-group image-preview [TO HERE]-->
+          </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <a href="index.html" class="btn btn-primary">Submit</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+</script>
+
+</body>
+</html>
