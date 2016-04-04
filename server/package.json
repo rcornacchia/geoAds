@@ -1,0 +1,18 @@
+{
+  "name": "GeoAdsServer",
+  "version": "1.0.0",
+  "description": "Simple server for GeoAds to connect to",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.4",
+    "morgan": "^1.7.0",
+    "path": "^0.12.7",
+    "swig": "^1.4.2"
+  }
+}
