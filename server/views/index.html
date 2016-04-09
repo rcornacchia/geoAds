@@ -3,11 +3,24 @@
     <link rel="stylesheet" type="text/css" href="main.css" />
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    
+
 </head>
 <body>
 <h1>GeoAds Server</h1>
 
 
+
+<div id="map"></div>
+<script src="gmaps.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBlaLk8GbtnpzMZhSjC84Kmt3qp_QccR-g&callback=initMap" async defer></script>
+
 </body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.js"></script>
+<script>
+    var socket = io.connect('http://localhost:8081'); // change to server url?
+    socket.on('location_update', function (data) {
+        console.log(data);
+    });
+</script>
 </html>

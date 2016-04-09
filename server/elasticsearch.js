@@ -6,7 +6,7 @@ var elasticSearch = require('elasticsearch');
 
 // Connect to ElasticSearch cluster
 var client = new elasticSearch.Client({
-    host: '', // create a new one on AWS
+    host: 'search-geo-ads-qpjwkygbkgrhsv6wjg7wyk7scu.us-east-1.es.amazonaws.com', 
     log: 'trace'
 });
 
