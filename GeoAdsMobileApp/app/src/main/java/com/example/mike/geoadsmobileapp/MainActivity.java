@@ -1,10 +1,12 @@
 package com.example.mike.geoadsmobileapp;
 
 import android.Manifest;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements
         LocationListener  {
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private final int APP_ACCESS_FINE_LOCATION_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +81,12 @@ public class MainActivity extends AppCompatActivity implements
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
         if (permissionCheck == -1) {
-            System.out.println("NO permission for ACCESS_FINE_LOCATION");
+            System.out.println("NO permission for ACCESS_FINE_LOCATION, requesting...");
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    APP_ACCESS_FINE_LOCATION_CODE);
         }
+
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -126,27 +133,11 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             handleNewLocation(location);
         }
-        /*String latitude = "null";
-        String longitude = "null";
-
-        int permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation == null) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
-        if (mLastLocation != null) {
-            latitude = String.valueOf(mLastLocation.getLatitude());
-            longitude = String.valueOf(mLastLocation.getLongitude());
-        }
-        System.out.println("Last location: lat=" + latitude + " lon=" + longitude);
-        return;*/
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        System.out.println("onLocationChanged called");
         handleNewLocation(location);
         return;
     }
@@ -181,7 +172,21 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch(requestCode) {
+            case APP_ACCESS_FINE_LOCATION_CODE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    System.out.println("ACCESS_FINE_LOCATION permission granted");
+                }
+                else {
+                    System.out.println("ACCESS_FINE_LOCATION permission denied");
+                }
+            }
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
