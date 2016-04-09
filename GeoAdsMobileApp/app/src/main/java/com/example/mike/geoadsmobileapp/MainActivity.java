@@ -21,6 +21,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -32,6 +33,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -40,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private final int APP_ACCESS_FINE_LOCATION_CODE = 100;
+    private final String SERVER_URL = "http://209.2.224.152:8081/location";
+    String android_id;
+    RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,44 +55,17 @@ public class MainActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         final TextView mTextView = (TextView) findViewById(R.id.text);
 
         // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
+        queue = Volley.newRequestQueue(this);
         String url = "http://www.google.com";
 
         // Get unique 64-bit hex string of android device
-        String android_id = Secure.getString(getApplicationContext().getContentResolver(),
+        android_id = Secure.getString(getApplicationContext().getContentResolver(),
                 Secure.ANDROID_ID);
         System.out.println("Android id is: " + android_id);
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        //mTextView.setText("Response is: "+ response.substring(0,500));
-                        System.out.println("Response is: " + response.substring(0, 500));
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //mTextView.setText("That didn't work!");
-                System.out.println("Error response");
-            }
-        });
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
 
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -161,6 +141,33 @@ public class MainActivity extends AppCompatActivity implements
         latitude = String.valueOf(location.getLatitude());
         longitude = String.valueOf(location.getLongitude());
         System.out.println("Last location: lat=" + latitude + " lon=" + longitude);
+        JSONObject locationJSON = new JSONObject();
+        try {
+            locationJSON.put("id", android_id);
+            locationJSON.put("lat", latitude);
+            locationJSON.put("lon", longitude);
+        }
+        catch (JSONException e) {
+            System.out.println("Unable to create locationJSON");
+            return;
+        }
+        JsonObjectRequest locationJSONreq =
+                new JsonObjectRequest(Request.Method.POST,
+                                    SERVER_URL,
+                                    locationJSON,
+                                    new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            System.out.println("Successful JSON POST: " + response.toString());
+                                        }
+                                    },
+                                    new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+                                            System.out.println("JSON POST Volley error: " + error.getMessage());
+                                        }
+                                    });
+        queue.add(locationJSONreq);
     }
 
     @Override
