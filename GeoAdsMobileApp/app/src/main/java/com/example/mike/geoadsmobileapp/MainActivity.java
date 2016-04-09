@@ -27,9 +27,12 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener  {
-    GoogleApiClient mGoogleApiClient;
+public class MainActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener  {
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
 
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permissionCheck == -1) {
+            System.out.println("NO permission for ACCESS_FINE_LOCATION");
+        }
+
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -81,11 +90,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .build();
         }
 
+        // Create the LocationRequest object
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(10 * 1000)        // 10 seconds
+                .setFastestInterval(1 * 1000); // 1 second
     }
 
     @Override
     protected void onStart() {
-        mGoogleApiClient.connect();
         super.onStart();
     }
 
@@ -95,9 +108,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStop();
     }
 
+    private void handleNewLocation(Location location) {
+        String latitude;
+        String longitude;
+        latitude = String.valueOf(location.getLatitude());
+        longitude = String.valueOf(location.getLongitude());
+        System.out.println("Last location: lat=" + latitude + " lon=" + longitude);
+    }
+
     @Override
     public void onConnected(Bundle bundle) {
-        String latitude = "null";
+        System.out.println("Location services connected");
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (location == null) {
+            System.out.println("Location is null");
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        } else {
+            handleNewLocation(location);
+        }
+        /*String latitude = "null";
         String longitude = "null";
 
         int permissionCheck = ContextCompat.checkSelfPermission(this,
@@ -105,19 +134,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
+        if (mLastLocation == null) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
         if (mLastLocation != null) {
             latitude = String.valueOf(mLastLocation.getLatitude());
             longitude = String.valueOf(mLastLocation.getLongitude());
         }
         System.out.println("Last location: lat=" + latitude + " lon=" + longitude);
-        return;
+        return;*/
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        String msg = "Updated location: lat=" + Double.toString(location.getLatitude())
-                + " lon=" + Double.toString(location.getLongitude());
-        System.out.println(msg);
+        handleNewLocation(location);
         return;
     }
 
@@ -128,18 +158,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnectionSuspended(int arg) {
-        return;
+        System.out.println("Location services suspended");
     }
 
-    protected void startLocationRequests() {
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        int permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(mGoogleApiClient == null) {
+            System.out.println("mGoogleApiClient is null!");
+        }
+        mGoogleApiClient.connect();
+        System.out.println("mGoogleApiClient connected");
+        mGoogleApiClient.connect();
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
