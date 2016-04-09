@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10 * 1000)        // 10 seconds
-                .setFastestInterval(1 * 1000); // 1 second
+                .setFastestInterval(1000); // 1 second
     }
 
     @Override
@@ -173,10 +173,15 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         System.out.println("Location services connected");
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permissionCheck == -1) {
+            return;
+        }
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         if (location == null) {
             System.out.println("Location is null");
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } else {
             handleNewLocation(location);
         }
@@ -186,12 +191,11 @@ public class MainActivity extends AppCompatActivity implements
     public void onLocationChanged(Location location) {
         System.out.println("onLocationChanged called");
         handleNewLocation(location);
-        return;
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        return;
+        System.out.println("Connecting failed");
     }
 
     @Override
@@ -207,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements
         }
         mGoogleApiClient.connect();
         System.out.println("mGoogleApiClient connected");
-        mGoogleApiClient.connect();
     }
 
     @Override
