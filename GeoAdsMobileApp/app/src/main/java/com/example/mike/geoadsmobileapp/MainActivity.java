@@ -40,6 +40,16 @@ public class MainActivity extends AppCompatActivity {
 
         Intent wakeAttentionBrother = new Intent(this, AttentionBrotherService.class);
         startService(wakeAttentionBrother);
+
+        /* We need to register the device and app to Google Cloud Messaging
+        *  Steps:
+        *  Check if Google Play Services are available
+        *  Check if we are already registered
+        *  Asynchronously register to GCM and store regID in shared preferences
+        *  https://www.pubnub.com/blog/2015-06-24-sending-receiving-android-push-notifications-with-gcm-google-cloud-messaging/
+        *  has instructions but apparently using AsyncTask() is a deprecated design pattern
+        *  Adapt for a background service, register to GCM and send regID + ANDROID_ID to the webserver
+        */
     }
 
     @Override
