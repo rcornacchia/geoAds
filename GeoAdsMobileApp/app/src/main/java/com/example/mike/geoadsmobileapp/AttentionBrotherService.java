@@ -7,6 +7,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.sqs.AmazonSQSClient;
+
 public class AttentionBrotherService extends Service {
     /*
        TODO: Implement this class with various hardware listeners
@@ -17,6 +21,13 @@ public class AttentionBrotherService extends Service {
        *
        * Use a broadcast receiver: http://developer.android.com/reference/android/content/BroadcastReceiver.html
      */
+
+    /*
+        Temporary AWS access keys for development, replace this with Amazon Cognito Identity:
+        http://docs.aws.amazon.com/mobile/sdkforandroid/developerguide/cognito-auth.html
+     */
+    private final String SQS_ACCESS_KEY_ID = "AKIAIM7MKGE5ZKGJYKPQ";
+    private final String SQS_SECRET_ACCESS_KEY = "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";
 
     /*
         For screen lock broadcast receiver I followed this tutorial:
@@ -41,9 +52,14 @@ public class AttentionBrotherService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        // Get set up to receive screen on/off intents
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(screenOnOffReceiver, filter);
+
+        // set up AWS credentials for SQS
+        AWSCredentials credentials = new BasicAWSCredentials( SQS_ACCESS_KEY_ID, SQS_SECRET_ACCESS_KEY );
+        AmazonSQSClient sqsClient = new AmazonSQSClient( credentials );
     }
 
     @Override
