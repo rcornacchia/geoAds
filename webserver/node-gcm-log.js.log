@@ -1,0 +1,28 @@
+> var gcm = require('node-gcm');
+undefined
+> var message = new gcm.Message();
+undefined
+> message.addData('key1','msg1');
+'msg1'
+> message
+Message { params: { data: { key1: 'msg1' } } }
+> var regTokens = ['ejHESfxKvdQ:APA91bGwd_8x4Y0VGdY-9cLo2SK1g9iCCS8iwq_VRRNRHINkRHCM-1oTaFBUz4VjqrZB3ngPF2M6esNGsapo36IWhBXXf2KPIh2QI7A_iFHMW8VDTRDtGUBlaGJP-dGO4nYUUWFxmwxU'];
+undefined
+> regTokens
+[ 'ejHESfxKvdQ:APA91bGwd_8x4Y0VGdY-9cLo2SK1g9iCCS8iwq_VRRNRHINkRHCM-1oTaFBUz4VjqrZB3ngPF2M6esNGsapo36IWhBXXf2KPIh2QI7A_iFHMW8VDTRDtGUBlaGJP-dGO4nYUUWFxmwxU' ]
+> var sender = new gcm.Sender('AIzaSyBCZRYEHTCOWaiYc0EcuYaGglDE0FXjM3g');
+undefined
+> sender
+Sender {
+  key: 'AIzaSyBCZRYEHTCOWaiYc0EcuYaGglDE0FXjM3g',
+  options: undefined }
+> sender.send(message, {registrationTokens: regTokens}, function(err,response) {
+... if (err) console.log(err);
+... else console.log(response);
+... });
+undefined
+> { multicast_id: 5603830807761022000,
+  success: 1,
+  failure: 0,
+  canonical_ids: 0,
+  results: [ { message_id: '0:1461363072869837%5522eab9f9fd7ecd' } ] }

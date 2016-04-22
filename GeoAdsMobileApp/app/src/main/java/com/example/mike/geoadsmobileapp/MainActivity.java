@@ -1,20 +1,34 @@
 package com.example.mike.geoadsmobileapp;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+
 
 public class MainActivity extends AppCompatActivity {
     private final int APP_ACCESS_FINE_LOCATION_CODE = 100;
+//    private static final String TAG = "MainActivity";
+//    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private boolean isReceiverRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +64,34 @@ public class MainActivity extends AppCompatActivity {
         *  has instructions but apparently using AsyncTask() is a deprecated design pattern
         *  Adapt for a background service, register to GCM and send regID + ANDROID_ID to the webserver
         */
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences
+                        .getBoolean("sentTokenToServer", false);
+                if (sentToken) {
+                    System.out.println("Token already sent!");
+                } else {
+                    System.out.println("We haven't sent the token yet.");
+                }
+            }
+        };
+
+        // Registering BroadcastReceiver
+        registerReceiver();
+
+        Intent intent = new Intent(this, RegistrationIntentService.class);
+        startService(intent);
+    }
+
+    private void registerReceiver(){
+        if(!isReceiverRegistered) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                    new IntentFilter("registrationComplete"));
+            isReceiverRegistered = true;
+        }
     }
 
     @Override
