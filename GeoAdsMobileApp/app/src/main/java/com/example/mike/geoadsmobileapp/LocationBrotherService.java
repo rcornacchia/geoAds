@@ -36,6 +36,7 @@ public class LocationBrotherService extends Service implements
 
     private final int APP_ACCESS_FINE_LOCATION_CODE = 100;
     private final String SERVER_URL = "http://209.2.224.152:8000/location";
+    private String ELASTICSEARCH_URL = "https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/";
 
     @Override
     public void onCreate() {
@@ -46,7 +47,9 @@ public class LocationBrotherService extends Service implements
         // Get unique 64-bit hex string of android device
         mAndroidId = Settings.Secure.getString(getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        System.out.println("Android id is: " + mAndroidId);
+        System.out.println("LocationBrother: Android id is: " + mAndroidId);
+        ELASTICSEARCH_URL += mAndroidId;
+        System.out.println("ES endpoint: " + ELASTICSEARCH_URL + "/_update");
     }
 
     @Override
@@ -120,7 +123,6 @@ public class LocationBrotherService extends Service implements
         System.out.println("Last location: lat=" + latitude + " lon=" + longitude);
         JSONObject locationJSON = new JSONObject();
         try {
-            locationJSON.put("id", mAndroidId);
             locationJSON.put("lat", latitude);
             locationJSON.put("lon", longitude);
         }
@@ -128,10 +130,32 @@ public class LocationBrotherService extends Service implements
             System.out.println("Unable to create locationJSON");
             return;
         }
-        JsonObjectRequest locationJSONreq =
+
+        JSONObject docJSON = new JSONObject();
+        try {
+            docJSON.put("location", locationJSON);
+        }
+        catch (JSONException e) {
+            System.out.println("Unable to create docJSON");
+            return;
+        }
+
+        JSONObject elasticSearchParams = new JSONObject();
+        try {
+            elasticSearchParams.put("doc", docJSON);
+            elasticSearchParams.put("doc_as_upsert", true);
+        }
+        catch (JSONException e) {
+            System.out.println("Unable to create elasticSearchParams");
+            return;
+        }
+
+        System.out.println("elasticSearchParams: " + elasticSearchParams.toString());
+
+        JsonObjectRequest elasticSearchJSONreq =
                 new JsonObjectRequest(Request.Method.POST,
-                        SERVER_URL,
-                        locationJSON,
+                        ELASTICSEARCH_URL,
+                        elasticSearchParams,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
@@ -144,7 +168,8 @@ public class LocationBrotherService extends Service implements
                                 System.out.println("JSON POST Volley error: " + error.getMessage());
                             }
                         });
-        mVolleyQueue.add(locationJSONreq);
+
+        mVolleyQueue.add(elasticSearchJSONreq);
     }
 
     @Override
