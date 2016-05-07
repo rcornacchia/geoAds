@@ -48,7 +48,7 @@ public class LocationBrotherService extends Service implements
         mAndroidId = Settings.Secure.getString(getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         System.out.println("LocationBrother: Android id is: " + mAndroidId);
-        ELASTICSEARCH_URL += mAndroidId;
+        ELASTICSEARCH_URL += mAndroidId + "/_update";
         System.out.println("ES endpoint: " + ELASTICSEARCH_URL + "/_update");
     }
 
@@ -116,15 +116,15 @@ public class LocationBrotherService extends Service implements
 
 
     private void handleNewLocation(Location location) {
-        String latitude;
-        String longitude;
-        latitude = String.valueOf(location.getLatitude());
-        longitude = String.valueOf(location.getLongitude());
-        System.out.println("Last location: lat=" + latitude + " lon=" + longitude);
+//        String latitude;
+//        String longitude;
+//        latitude = String.valueOf(location.getLatitude());
+//        longitude = String.valueOf(location.getLongitude());
+//        System.out.println("Last location: lat=" + latitude + " lon=" + longitude);
         JSONObject locationJSON = new JSONObject();
         try {
-            locationJSON.put("lat", latitude);
-            locationJSON.put("lon", longitude);
+            locationJSON.put("lat", location.getLatitude());
+            locationJSON.put("lon", location.getLongitude());
         }
         catch (JSONException e) {
             System.out.println("Unable to create locationJSON");
@@ -150,7 +150,9 @@ public class LocationBrotherService extends Service implements
             return;
         }
 
+        System.out.println("LocationBrother request:");
         System.out.println("elasticSearchParams: " + elasticSearchParams.toString());
+        System.out.println("elasticSearcUrl: " + ELASTICSEARCH_URL);
 
         JsonObjectRequest elasticSearchJSONreq =
                 new JsonObjectRequest(Request.Method.POST,

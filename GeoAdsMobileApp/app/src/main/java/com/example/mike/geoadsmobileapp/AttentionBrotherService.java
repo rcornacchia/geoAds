@@ -69,7 +69,7 @@ public class AttentionBrotherService extends Service {
         mAndroidId = Settings.Secure.getString(getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         System.out.println("AttentionBrother: Android id is: " + mAndroidId);
-        ELASTICSEARCH_URL += mAndroidId;
+        ELASTICSEARCH_URL += mAndroidId + "/_update";
     }
 
     @Override
@@ -96,15 +96,17 @@ public class AttentionBrotherService extends Service {
 
         JSONObject elasticSearchParams = new JSONObject();
         try {
-            elasticSearchParams.put("doc", docJSON);
             elasticSearchParams.put("doc_as_upsert", true);
+            elasticSearchParams.put("doc", docJSON);
         }
         catch (JSONException e) {
             System.out.println("Unable to create elasticSearchParams");
             return super.onStartCommand(intent, flags, startId);
         }
 
+        System.out.println("AttentionBrother request:");
         System.out.println("elasticSearchParams: " + elasticSearchParams.toString());
+        System.out.println("elasticSearcUrl: " + ELASTICSEARCH_URL);
 
         JsonObjectRequest elasticSearchJSONreq =
                 new JsonObjectRequest(Request.Method.POST,
