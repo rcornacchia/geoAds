@@ -7,6 +7,41 @@ var bodyParser = require('body-parser');
 var elasticSearch = require('elasticsearch');
 var swig = require('swig');
 var path = require('path');
+var rp = require('request-promise');
+/* Require gcm with:
+var gcm = require('/gcm.js');
+*/
+
+// Get devices within radius in meters around center {lat, lon}
+function getDevicesAround(center, radius) {
+    var requestParams = {
+        // Eventually pull this url out of here
+        uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/_search',
+        method: 'POST',
+        json: {
+            query: {
+                filtered: {
+                    query: {
+                        match_all: {}
+                    },
+                    filter: {
+                        geo_distance: {
+                            distance: radius + 'm',
+                            location: center
+                        }
+                    }
+                }
+            }
+        },
+        transform: function(response) {
+            var results = response.hits.hits.map(function(hit) {
+                return hit._source;
+            });
+            return results;
+        }
+    };
+    return rp(requestParams);
+}
 
 server.listen(8000);
 
