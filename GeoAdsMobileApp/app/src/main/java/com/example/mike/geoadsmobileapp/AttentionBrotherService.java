@@ -1,12 +1,24 @@
 package com.example.mike.geoadsmobileapp;
 
+import android.app.ActionBar;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.net.Uri;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -18,11 +30,15 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class AttentionBrotherService extends Service {
+public class AttentionBrotherService extends Service implements View.OnTouchListener {
 
     private String mAndroidId;
     private RequestQueue mVolleyQueue;
     private String ELASTICSEARCH_URL = "https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/";
+    private LinearLayout touchLayout;
+    private WindowManager mWindowManager;
+    private CountDownTimer sinceLastTouchTimer;
+    private final int TOUCH_TIMEOUT = 5000; // touchscreen activity on/off timeout, in ms
     /*
        TODO: Implement this class with various hardware listeners
        Aggregate all factors we have to decide whether the user is paying attention
@@ -70,18 +86,49 @@ public class AttentionBrotherService extends Service {
                 Settings.Secure.ANDROID_ID);
         System.out.println("AttentionBrother: Android id is: " + mAndroidId);
         ELASTICSEARCH_URL += mAndroidId + "/_update";
-    }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        boolean screenOn = intent.getBooleanExtra("screenState", true);
-        String state = "off";
-        if(screenOn) {
-            System.out.println("AttentionBrotherService received screenOn = true");
+        /*
+            set up layouts to recognize touches
+            create a dummy window that's 1px x 1px and catch all activity OUTSIDE of it
+            referencing: http://www.kpbird.com/2013/03/android-detect-global-touch-event.html
+         */
+        touchLayout = new LinearLayout(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(1, 1);
+        touchLayout.setBackgroundColor(Color.CYAN); //diagnostic to see how big the fake layout is
+        touchLayout.setLayoutParams(lp);
+        touchLayout.setOnTouchListener(this);
+
+        // create dummy window
+        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
+                1, // width is 1 px
+                1, // height is 1 px
+                WindowManager.LayoutParams.TYPE_PHONE, // Type Phone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,// this window won't ever get key input focus, watch outside touches
+                PixelFormat.TRANSLUCENT);
+        mParams.gravity = Gravity.LEFT | Gravity.TOP;
+        mWindowManager.addView(touchLayout, mParams);
+
+        // create the global timer
+        sinceLastTouchTimer = new CountDownTimer(TOUCH_TIMEOUT, TOUCH_TIMEOUT) {
+            public void onTick(long millisUntilFinished) {
+            }
+
+            public void onFinish() {
+                sendState(false);
+            }
+        };
+    } // end onCreate()
+
+    // function to send the state of the device to elasticsearch
+    public void sendState(boolean receivedState) {
+        String state;
+        if (receivedState) {
             state = "on";
         }
         else {
-            System.out.println("AttentionBrotherService received screenOff = false");
             state = "off";
         }
 
@@ -91,7 +138,7 @@ public class AttentionBrotherService extends Service {
         }
         catch (JSONException e) {
             System.out.println("Unable to create docJSON");
-            return super.onStartCommand(intent, flags, startId);
+            return;
         }
 
         JSONObject elasticSearchParams = new JSONObject();
@@ -101,7 +148,7 @@ public class AttentionBrotherService extends Service {
         }
         catch (JSONException e) {
             System.out.println("Unable to create elasticSearchParams");
-            return super.onStartCommand(intent, flags, startId);
+            return;
         }
 
         System.out.println("AttentionBrother request:");
@@ -126,8 +173,33 @@ public class AttentionBrotherService extends Service {
                         });
 
         mVolleyQueue.add(elasticSearchJSONreq);
+    } // end sendState()
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        boolean screenOn = intent.getBooleanExtra("screenState", true);
+        String state;
+        if(screenOn) {
+            System.out.println("AttentionBrotherService received screenOn = true");
+            sendState(true);
+        }
+        else {
+            System.out.println("AttentionBrotherService received screenOff = false");
+            sendState(false);
+        }
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+            System.out.println("Screen touched");
+            sendState(true);
+            sinceLastTouchTimer.start();
+        }
+
+        return false;
     }
 
     @Override

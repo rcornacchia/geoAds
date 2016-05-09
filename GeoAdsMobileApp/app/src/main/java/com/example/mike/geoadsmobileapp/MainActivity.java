@@ -7,8 +7,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 //    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private boolean isReceiverRegistered;
+    private final int OVERLAY_REQUEST_CODE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +52,22 @@ public class MainActivity extends AppCompatActivity {
                     APP_ACCESS_FINE_LOCATION_CODE);
         }
 
+        // permissions for detecting global touch
+        if (!Settings.canDrawOverlays(this.getApplicationContext())) {
+            /** if not construct intent to request permission */
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            /** request permission via start activity for result */
+            startActivityForResult(intent, OVERLAY_REQUEST_CODE);
+        }
+
         Intent wakeLocationBrother = new Intent(this, LocationBrotherService.class);
         startService(wakeLocationBrother);
 
-        Intent wakeAttentionBrother = new Intent(this, AttentionBrotherService.class);
-        startService(wakeAttentionBrother);
+        if (Settings.canDrawOverlays(this)) {
+            Intent wakeAttentionBrother = new Intent(this, AttentionBrotherService.class);
+            startService(wakeAttentionBrother);
+        }
 
         /* We need to register the device and app to Google Cloud Messaging
         *  Steps:
@@ -84,6 +98,17 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, RegistrationIntentService.class);
         startService(intent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == OVERLAY_REQUEST_CODE) {
+            if (Settings.canDrawOverlays(this)) {
+                Intent wakeAttentionBrother = new Intent(this, AttentionBrotherService.class);
+                startService(wakeAttentionBrother);
+            }
+        }
     }
 
     private void registerReceiver(){

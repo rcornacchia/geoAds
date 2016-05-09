@@ -131,9 +131,12 @@ public class LocationBrotherService extends Service implements
             return;
         }
 
+        System.out.println("Accuracy: " + location.getAccuracy());
         JSONObject docJSON = new JSONObject();
         try {
             docJSON.put("location", locationJSON);
+            docJSON.put("direction", location.getBearing());
+            docJSON.put("speed", location.getSpeed());
         }
         catch (JSONException e) {
             System.out.println("Unable to create docJSON");
@@ -168,6 +171,7 @@ public class LocationBrotherService extends Service implements
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 System.out.println("JSON POST Volley error: " + error.getMessage());
+                                error.printStackTrace();
                             }
                         });
 
