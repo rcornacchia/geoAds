@@ -39,6 +39,7 @@ public class AttentionBrotherService extends Service implements View.OnTouchList
     private WindowManager mWindowManager;
     private CountDownTimer sinceLastTouchTimer;
     private final int TOUCH_TIMEOUT = 5000; // touchscreen activity on/off timeout, in ms
+    private boolean currState;
     /*
        TODO: Implement this class with various hardware listeners
        Aggregate all factors we have to decide whether the user is paying attention
@@ -120,18 +121,27 @@ public class AttentionBrotherService extends Service implements View.OnTouchList
                 sendState(false);
             }
         };
+
+        // initial state is off, turn on
+        currState = false;
+        sendState(true);
     } // end onCreate()
 
     // function to send the state of the device to elasticsearch
     public void sendState(boolean receivedState) {
         String state;
-        if (receivedState) {
-            state = "on";
+        if (receivedState == currState) {
+            System.out.println("State received " + receivedState + " but is unchanged, don't send");
+            return;
         }
         else {
-            state = "off";
+            if (receivedState) {
+                state = "on";
+            } else {
+                state = "off";
+            }
+            currState = receivedState;
         }
-
         JSONObject docJSON = new JSONObject();
         try {
             docJSON.put("state", state);
