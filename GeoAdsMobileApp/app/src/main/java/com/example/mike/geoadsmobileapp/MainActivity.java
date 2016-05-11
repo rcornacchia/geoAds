@@ -52,22 +52,11 @@ public class MainActivity extends AppCompatActivity {
                     APP_ACCESS_FINE_LOCATION_CODE);
         }
 
-        // permissions for detecting global touch
-        if (!Settings.canDrawOverlays(this.getApplicationContext())) {
-            /** if not construct intent to request permission */
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
-            /** request permission via start activity for result */
-            startActivityForResult(intent, OVERLAY_REQUEST_CODE);
-        }
-
         Intent wakeLocationBrother = new Intent(this, LocationBrotherService.class);
         startService(wakeLocationBrother);
 
-        if (Settings.canDrawOverlays(this)) {
-            Intent wakeAttentionBrother = new Intent(this, AttentionBrotherService.class);
-            startService(wakeAttentionBrother);
-        }
+        Intent wakeAttentionBrother = new Intent(this, AttentionBrotherService.class);
+        startService(wakeAttentionBrother);
 
         /* We need to register the device and app to Google Cloud Messaging
         *  Steps:
@@ -104,10 +93,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == OVERLAY_REQUEST_CODE) {
-            if (Settings.canDrawOverlays(this)) {
-                Intent wakeAttentionBrother = new Intent(this, AttentionBrotherService.class);
-                startService(wakeAttentionBrother);
-            }
+            Intent wakeAttentionBrother = new Intent(this, AttentionBrotherService.class);
+            startService(wakeAttentionBrother);
         }
     }
 
