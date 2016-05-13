@@ -52,9 +52,6 @@ public class RegistrationIntentService extends IntentService {
 
             sendRegistrationToServer(token);
 
-            // You should store a boolean that indicates whether the generated token has been
-            // sent to your server. If the boolean is false, send the token to your server,
-            // otherwise your server should have already received the token.
             sharedPreferences.edit().putBoolean("sentTokenToServer", true).apply();
             // [END register_for_gcm]
         } catch (Exception e) {
@@ -63,10 +60,6 @@ public class RegistrationIntentService extends IntentService {
             // on a third-party server, this ensures that we'll attempt the update at a later time.
             sharedPreferences.edit().putBoolean("sentTokenToServer", false).apply();
         }
-        // This doesn't seem needed, we aren't notifying a UI
-//        // Notify UI that registration has completed, so the progress indicator can be hidden.
-//        Intent registrationComplete = new Intent("registrationComplete");
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
 
     /**

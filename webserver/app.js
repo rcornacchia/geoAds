@@ -8,9 +8,7 @@ var elasticSearch = require('elasticsearch');
 var swig = require('swig');
 var path = require('path');
 var rp = require('request-promise');
-/* Require gcm with:
-var gcm = require('/gcm.js');
-*/
+var gcm = require('./gcm.js');
 
 // Get devices within radius in meters around center {lat, lon}
 function getDevicesAround(center, radius) {
@@ -45,34 +43,6 @@ function getDevicesAround(center, radius) {
 
 server.listen(8000);
 
-app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
-});
-
-io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-});
-
-
-/*
-It is assumed that credentials are set in ~/.aws/credentials or
-AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY have been exported
-as environment variables.
-*/
-var AWS = require('aws-sdk');
-var SQS = new AWS.SQS({ // Look into notifying with SNS instead
-    region: 'us-east-1'
-});
-
-// Connect to ElasticSearch cluster
-var client = new elasticSearch.Client({
-    host: 'search-geo-ads-qpjwkygbkgrhsv6wjg7wyk7scu.us-east-1.es.amazonaws.com',
-    log: 'trace'
-});
-
 // Configure app for listening for post requests
 app.use(bodyParser.json());
 app.use(morgan('dev'));
@@ -84,45 +54,60 @@ app.set('views', path.join(__dirname, 'views'));
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 
-// app.get('/', function(req, res) {
-//     res.render('index');
-// });
+app.post('/rejectAd', function(req, res) {
+    var androidId = req.body.androidId;
+    var adId = req.body.adId;
 
-app.post('/location', function(req, res) {
-    // We might want to do some input checking / validation here
+    // If we keep array of ads in browser memory
+    // emit on socket.io
 
-    /* {
-        id: String, // this is the unique android device ID
-        lat: Number,
-        lon: Number
-    } */
-
-    console.log(req.body);
-    io.emit('location_update', {location: req.body});
-    // client.update({
-    //     index: 'devices',
-    //     type: 'device',
-    //     id: req.body.id,
-    //     body: {
-    //         doc: {
-    //             location: {
-    //                 'lat': req.body.location.lat,
-    //                 'lon': req.body.location.lon
-    //             }
-    //         },
-    //         doc_as_upsert: true
+    // Else if we keep ads in elasticsearch
+    // var updateParams = {
+    //     uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/' + androidId + '/_update',
+    //     method: 'POST',
+    //     json: {
+    //         script: "ctx._source.rejected += 1",
+    //         upsert: {
+    //             "rejected" : 1
+    //         }
     //     }
-    // });
+    // }
+    // rp(updateParams)
+    //     .then(function(response) {
+    //         console.log("success: " + response);
+    //     })
+    //     .catch(function(error) {
+    //         console.log("rejectedAd failed: " + _error);
+    //     });
+});
 
-    // var params = {
-    //     MessageBody: JSON.stringify(req.body),
-    //     QueueUrl: 'https://sqs.us-east-1.amazonaws.com/746215537304/geoAds',
-    // };
-    //
-    // SQS.sendMessage(params, function(error, data) {
-    //     if (error) console.log(error, error.stack);
-    //     else console.log(data);
-    // });
+app.get('/redirect', function(req, res) {
+    console.log(req.query);
+    var adId = req.query.adId;
+    var androidId = req.query.androidId;
 
-    res.json(req.body);
+    // Emit accepted ad on socket io
+
+    // or if we store on elasticSearch
+    // var updateParams = {
+    //     uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/' + androidId + '/_update',
+    //     method: 'POST',
+    //     json: {
+    //         script: "ctx._source.clicks += 1",
+    //         upsert: {
+    //             "clicks" : 1
+    //         }
+    //     }
+    // }
+    // rp(updateParams)
+    //     .then(function(response) {
+    //         console.log("success: " + response);
+    //     })
+    //     .catch(function(error) {
+    //         console.log("acceptedAd failed: " + _error);
+    //     });
+
+    // Redirect user
+    var link = req.query.link;
+    res.redirect(link);
 });
