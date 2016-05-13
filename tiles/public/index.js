@@ -1,6 +1,7 @@
 var map;
 var gMarkers = [];
 var users = [];
+var ads = [];
 var range = "1000";
 
 function mapMarkers(gMarkers) {
