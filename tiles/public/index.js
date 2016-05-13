@@ -4,26 +4,76 @@ var users = [];
 var ads = [];
 var range = "1000";
 
-function mapMarkers(gMarkers) {
-    var state;
-    var icon;
-    gMarkers.forEach(function(gMarker) {
-        console.log(gMarker);
-        var position_options = {
-            lat: parseFloat(gMarker[0].lat),
-            lng: parseFloat(gMarker[0].lon)
-        };
 
-        state = gMarker[1];
-        if(state == "off") {
+function upsertDeviceMarker(array, object) {
+    if (array.length < 1) {
+        array.push(object);
+    } else {
+        // obj.device.id is in the array
+        var deviceId = object.device.id;
+        array.forEach(function(arrayObj) {
+            if (arrayObj.device.id == deviceId) {
+                var changed = false;
+                if (arrayObj.device.state != object.device.state) {
+                    changed = true;
+                    // update user array
+                    arrayObj.device = object.device;
+
+                }
+                if (arrayObj.device.location != object.device.location) {
+                    changed = true;
+                    // update user array
+                    arrayObj.device = object.device;
+                }
+                if (changed) updateMarker(arrayObj);
+            }
+        });
+    }
+}
+
+function updateMarker(userMarker) {
+    // Update google maps marker
+    var device = userMarker.device;
+    var icon;
+    if (device.state == "off") {
+        icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
+    } else {
+        icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png"
+    }
+
+    var position_options = {
+        lat: parseFloat(device.location.lat),
+        lng: parseFloat(device.location.lng)
+    };
+
+    var marker = userMarker.marker;
+    marker.setPosition(position_options);
+}
+
+function mapDevices(devices) {
+    devices.forEach(function(device) {
+        console.log(device);
+        var icon;
+        if (device.state == "off") {
             icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
         } else {
             icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png"
         }
+
+        var position_options = {
+            lat: parseFloat(device.location.lat),
+            lng: parseFloat(device.location.lng)
+        };
+
         var marker = new google.maps.Marker({
-            position: position_options,
+            position : position_options,
             icon: icon,
             map: map
+        });
+
+        upsertDeviceMarker(users, {
+            device: device,
+            marker: marker
         });
     });
 }
@@ -52,13 +102,12 @@ function getDevicesAround(center, radius) {
         obj = data;
         console.log(data);
         for(var i=0; i<obj.hits.hits.length; i++){
-            hits.push([obj.hits.hits[i]._source.location, obj.hits.hits[i]._source.state, obj.hits.hits[i]._source.speed]);
+            var device = obj.hits.hits[i]._source;
+            hits.push(device);
         }
-        hits.forEach(function(hit) {
-            console.log(hit);
-        });
+        console.log(hits);
         // add the markers to the map
-        mapMarkers(hits);
+        mapDevices(hits);
     });
 }
 
@@ -109,15 +158,6 @@ var coordinates = {
     lon: parseFloat(-73.965749)
 };
 getDevicesAround(coordinates, 1000);
-
-
-
-
-
-
-
-
-
 
 /**
  * Created by Kupletsky Sergey on 16.09.14.
