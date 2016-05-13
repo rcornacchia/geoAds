@@ -26,7 +26,7 @@ import java.io.IOException;
 public class RegistrationIntentService extends IntentService {
 
     private static final String TAG = "RegIntentService";
-    private final String SERVER_URL = "https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData";
+    private final String SERVER_URL = "https://search-adbrother-2mnwlo4oaulpldztks3rg362i4.us-east-1.es.amazonaws.com/adbrother/userData";
     private RequestQueue mVolleyQueue;
 //    private static final String[] TOPICS = {"global"};
 
