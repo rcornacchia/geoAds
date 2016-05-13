@@ -36,7 +36,7 @@ public class LocationBrotherService extends Service implements
 
     private final int APP_ACCESS_FINE_LOCATION_CODE = 100;
     private final String SERVER_URL = "http://209.2.224.152:8000/location";
-    private String ELASTICSEARCH_URL = "https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/";
+    private String ELASTICSEARCH_URL = "https://search-adbrother-2mnwlo4oaulpldztks3rg362i4.us-east-1.es.amazonaws.com/adbrother/userData/";
 
     @Override
     public void onCreate() {

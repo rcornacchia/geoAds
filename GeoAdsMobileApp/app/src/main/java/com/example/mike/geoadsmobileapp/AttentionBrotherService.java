@@ -34,7 +34,7 @@ public class AttentionBrotherService extends Service implements View.OnTouchList
 
     private String mAndroidId;
     private RequestQueue mVolleyQueue;
-    private String ELASTICSEARCH_URL = "https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/";
+    private String ELASTICSEARCH_URL = "https://search-adbrother-2mnwlo4oaulpldztks3rg362i4.us-east-1.es.amazonaws.com/adbrother/userData/";
     private LinearLayout touchLayout;
     private WindowManager mWindowManager;
     private CountDownTimer sinceLastTouchTimer;
