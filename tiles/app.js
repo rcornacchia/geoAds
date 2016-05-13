@@ -53,6 +53,19 @@ app.use(morgan('dev'));
 // Set up static rendering
 app.use(express.static(path.join(__dirname, '/public')));
 
+app.post('/targetedAd', function(req, res) {
+    var ad = req.body.ad;
+    var targetId = req.body.targetId;
+    gcm.sendNotification(targetId, ad);
+});
+
+app.post('/broadcastAd', function(req, res) {
+    var ad = req.body;
+    var targetLocation = req.body.targetLocation;
+    var radius = req.body.radius;
+    gcm.broadcastNotification(targetLocation, radius, ad);
+});
+
 app.post('/rejectAd', function(req, res) {
     var androidId = req.body.androidId;
     var adId = req.body.adId;

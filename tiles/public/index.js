@@ -4,7 +4,6 @@ var users = [];
 var ads = [];
 var range = "1000";
 
-
 function upsertDeviceMarker(array, object) {
     if (array.length < 1) {
         array.push(object);
