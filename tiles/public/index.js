@@ -4,20 +4,38 @@ var users = [];
 var ads = [];
 var range = "1000";
 
-function upsertDeviceMarker(array, object) {
-    if (array.length < 1) {
-        array.push(object);
+// GET array for the first time --> plot data
+// Get array every second --> check to see if there are any changes or new users
+//      if there are new users plot them and add to users array
+//      if there is a change, change the marker accordingly
+
+
+// function upsert(newData) {
+//     // if any new users present in newData not in users array already
+//     newData.foreach(function(newUser) {
+//         users.forEach(function(oldUser) {
+//             if (oldUser.gcm == newUser.gcm) {
+//
+//             }
+//         }
+//     })
+//
+//     // if any old users changed state
+// }
+
+function upsertDeviceMarker(userArray, object) {
+    if (userArray.length < 1) {
+        userArray.push(object);
     } else {
         // obj.device.id is in the array
-        var deviceId = object.device.id;
-        array.forEach(function(arrayObj) {
-            if (arrayObj.device.id == deviceId) {
+        var deviceId = object.device.gcm;
+        userArray.forEach(function(arrayObj) {
+            if (arrayObj.device.gcm == deviceId) {
                 var changed = false;
                 if (arrayObj.device.state != object.device.state) {
                     changed = true;
                     // update user array
                     arrayObj.device = object.device;
-
                 }
                 if (arrayObj.device.location != object.device.location) {
                     changed = true;
@@ -33,53 +51,48 @@ function upsertDeviceMarker(array, object) {
 function updateMarker(userMarker) {
     // Update google maps marker
     var device = userMarker.device;
-    var icon;
+    var icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png";
     if (device.state == "off") {
-        icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
-    } else {
-        icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png"
+        icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png";
     }
 
     var position_options = {
         lat: parseFloat(device.location.lat),
-        lng: parseFloat(device.location.lng)
+        lng: parseFloat(device.location.lon)
     };
-
     var marker = userMarker.marker;
     marker.setPosition(position_options);
 }
 
-function mapDevices(devices) {
-    devices.forEach(function(device) {
-        console.log(device);
-        var icon;
-        if (device.state == "off") {
-            icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
-        } else {
-            icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png"
+function createMarkers (data) {
+    data.forEach(function(device) {
+        if(!!device.location) {
+            var icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png";
+            if (device.state == "off") {
+                icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
+            }
+            console.log(device);
+            var position_options = {
+                lat: parseFloat(device.location.lat),
+                lng: parseFloat(device.location.lon)
+            };
+            var marker = new google.maps.Marker({
+                position: position_options,
+                icon: icon,
+                map: map
+            });
+            // users.push({ device: device, marker: marker });
+            upsertDeviceMarker(users, {
+                device: device,
+                marker: marker
+            });
         }
-
-        var position_options = {
-            lat: parseFloat(device.location.lat),
-            lng: parseFloat(device.location.lng)
-        };
-
-        var marker = new google.maps.Marker({
-            position : position_options,
-            icon: icon,
-            map: map
-        });
-
-        upsertDeviceMarker(users, {
-            device: device,
-            marker: marker
-        });
     });
 }
 
 // Get devices within radius in meters around center {lat, lon}
 function getDevicesAround(center, radius) {
-    var uri = 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/_search';
+    var uri = 'https://search-adbrother-2mnwlo4oaulpldztks3rg362i4.us-east-1.es.amazonaws.com/adbrother/userData/_search';
     var json = {
         query: {
             filtered: {
@@ -96,23 +109,19 @@ function getDevicesAround(center, radius) {
         }
     };
     var json2 = JSON.stringify(json);
-    $.post(uri, json2).done(function(data){
+    $.post(uri, json2, function(data){
+        var hits = [];
+        obj = data;
         console.log(data);
-    }).fail(function() {
-        console.log("Failure");
-    })
-    // $.post(uri, json2, function(data){
-    //     var hits = [];
-    //     obj = data;
-    //     console.log(data);
-    //     for(var i=0; i<obj.hits.hits.length; i++){
-    //         var device = obj.hits.hits[i]._source;
-    //         hits.push(device);
-    //     }
-    //     console.log(hits);
-    //     // add the markers to the map
-    //     mapDevices(hits);
-    // });
+        for(var i=0; i<obj.hits.hits.length; i++){
+            var device = obj.hits.hits[i]._source;
+            hits.push(device);
+        }
+        console.log(hits);
+        // add the markers to the map
+        // mapDevices(hits);
+        createMarkers(hits);
+    });
 }
 
 function initMap() {
@@ -134,19 +143,7 @@ function initMap() {
         }
         gMarkers = [];
     }
-    google.maps.Map.prototype.createMarkers = function(gMarkers) {
-        gMarkers.forEach(function(location) {
-            console.log("test");
-            var position_options = {
-                lat: parseFloat(location[0]),
-                lng: parseFloat(location[1])
-            };
-            var marker = new google.maps.Marker({
-                position: position_options,
-                map: map
-            });
-        });
-    }
+
     var coordinates = {
         lat: parseFloat(40.805920),
         lng: parseFloat(-73.965749)
@@ -162,6 +159,19 @@ var coordinates = {
     lon: parseFloat(-73.965749)
 };
 getDevicesAround(coordinates, 1000);
+
+$(document).ready(function(){
+    $("#submitAd").on('click', function(e){
+        e.preventDefault();
+
+        $.post('/targetedAd', {}, function(data){
+            mapusers(data);
+        });
+    });
+});
+
+
+
 
 /**
  * Created by Kupletsky Sergey on 16.09.14.
@@ -229,3 +239,34 @@ getDevicesAround(coordinates, 1000);
         }).addClass("animate");
     })
 })(jQuery);
+
+
+
+// function mapDevices(devices) {
+//     devices.forEach(function(device) {
+//         console.log(device);
+//
+//         if(!!device.location) {
+//             var icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png";
+//             if (device.state == "off") {
+//                 icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
+//             }
+//             var position_options = {
+//                 lat: parseFloat(device.location.lat),
+//                 lng: parseFloat(device.location.lon)
+//             };
+//             console.log(position_options);
+//             var marker = new google.maps.Marker({
+//                 position : position_options,
+//                 icon: icon,
+//                 map: map
+//             });
+//             console.log(marker);
+//
+//             upsertDeviceMarker(users, {
+//                 device: device,
+//                 marker: marker
+//             });
+//         }
+//     });
+// }

@@ -14,7 +14,7 @@ var gcm = require('./gcm.js');
 function getDevicesAround(center, radius) {
     var requestParams = {
         // Eventually pull this url out of here
-        uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/userData/_search',
+        uri: 'https://search-adbrother-2mnwlo4oaulpldztks3rg362i4.us-east-1.es.amazonaws.com/adbrother/_search',
         method: 'POST',
         json: {
             query: {
