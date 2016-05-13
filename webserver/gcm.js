@@ -49,6 +49,7 @@ module.exports = {
     /*
      send notification to a single android device
      @adObject -> JSON string
+     {title, msg, url, id}
      @androidId -> string
     */
     sendNotification: function(androidId, adObject) {
@@ -56,7 +57,11 @@ module.exports = {
         gcmTokenPromise.then(function(gcmToken) {
             if (gcmToken) {
                 var message = new gcm.Message();
-                message.addData('body', adObject);
+                message.addData('title', adObject.title);
+                message.addData('msg', adObject.msg);
+                message.addData('url', adObject.url);
+                console.log(adObject.id);
+                message.addData('id', adObject.id);
                 sender.send(message, {registrationTokens: [gcmToken]}, function(err,response) {
                     if (err) log("gcm sendNotification failed: " + err);
                     else log(response);
@@ -76,7 +81,10 @@ module.exports = {
         gcmTokensPromise.then(function(gcmTokens) {
             if (gcmTokens.length > 0) {
                 var message = new gcm.Message();
-                message.addData('body', adObject);
+                message.addData('title', adObject.title);
+                message.addData('msg', adObject.msg);
+                message.addData('url', adObject.url);
+                message.addData('id', adObject.id);
                 sender.send(message, {registrationTokens: gcmTokens}, function(err, response) {
                     if (err) log("gcm broadcastNotification failed:" + err);
                     else log(response);
