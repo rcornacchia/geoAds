@@ -96,18 +96,23 @@ function getDevicesAround(center, radius) {
         }
     };
     var json2 = JSON.stringify(json);
-    $.post(uri, json2, function(data){
-        var hits = [];
-        obj = data;
+    $.post(uri, json2).done(function(data){
         console.log(data);
-        for(var i=0; i<obj.hits.hits.length; i++){
-            var device = obj.hits.hits[i]._source;
-            hits.push(device);
-        }
-        console.log(hits);
-        // add the markers to the map
-        mapDevices(hits);
-    });
+    }).fail(function() {
+        console.log("Failure");
+    })
+    // $.post(uri, json2, function(data){
+    //     var hits = [];
+    //     obj = data;
+    //     console.log(data);
+    //     for(var i=0; i<obj.hits.hits.length; i++){
+    //         var device = obj.hits.hits[i]._source;
+    //         hits.push(device);
+    //     }
+    //     console.log(hits);
+    //     // add the markers to the map
+    //     mapDevices(hits);
+    // });
 }
 
 function initMap() {
