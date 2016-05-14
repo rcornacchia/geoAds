@@ -5,6 +5,7 @@ var ads = [];
 var range = "1000";
 var numActiveUsers;
 var numInactiveUsers;
+var numAds = 0;
 
 
 // if user is no longer in array
@@ -233,6 +234,7 @@ setInterval(function() {
 
 $(document).ready(function(){
     $("#submitAd").on('click', function(e){
+        numAds += 1;
         e.preventDefault();
         var title = $("#adTitle").val();
         var discount = $("#discount").val();
@@ -251,9 +253,10 @@ $(document).ready(function(){
             mapusers(data);
         });
         var adText = title
-        $("#1-title").text(title);
-        $("#1-discount").text(discount + "%");
-        $("#1-link").text(link);
+        $("#" + numAds + "-title").text(title);
+        $("#" + numAds + "-discount").text(discount + "%");
+        $("#" + numAds + "-link").text(link);
+        if (numAds == 8) numAds = 0;
 
     });
 });
