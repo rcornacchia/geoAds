@@ -3,6 +3,12 @@ var gMarkers = [];
 var users = [];
 var ads = [];
 var range = "1000";
+var numActiveUsers;
+var numInactiveUsers;
+
+
+// if user is no longer in array
+// then remove marker
 
 // GET array for the first time --> plot data
 // Get array every second --> check to see if there are any changes or new users
@@ -30,22 +36,23 @@ function upsertDeviceMarker(devices) {
         // obj.device.id is in the array
         var deviceId = device.gcm;
         var found = false;
-        users.forEach(function(arrayObj) {
-            if (arrayObj.device.gcm == deviceId) {
+        users.forEach(function(user) {
+            if (user.device.gcm == deviceId) {
                 found = true;
                 var changed = false;
-                if (arrayObj.device.state != device.state) {
+                if (user.device.state != device.state) {
                     changed = true;
                     // update user array
-                    arrayObj.device = device;
+                    user.device = device;
                 }
-                if (arrayObj.device.location != device.location) {
+                if (user.device.location != device.location) {
                     changed = true;
                     // update user array
-                    arrayObj.device = device;
+                    user.device = device;
                 }
-                if (changed) updateMarker(arrayObj);
+                if (changed) updateMarker(user);
             }
+
         });
         if (!found) {
             if(!!device.location) {
@@ -66,6 +73,44 @@ function upsertDeviceMarker(devices) {
                 users.push({ device: device, marker: marker });
             }
         }
+    });
+
+    users.forEach(function(user) {
+        user.stillHere = false;
+        devices.forEach(function(device) {
+            if(user.device.gcm == device.gcm) {
+                // console.log("User still here");
+                // console.log(user.device.gcm);
+                // console.log(userStillHere);
+                user.stillHere = true;
+            }
+        });
+    });
+
+    users.forEach(function(user) {
+        if(user.stillHere == false){
+            console.log("USER LEFT");
+            user.marker.setMap(null);
+            var index = users.indexOf(user);
+            users.splice(index, 1);
+        }
+    });
+    numActiveUsers = 0;
+    numInactiveUsers = 0;
+    users.forEach(function(user) {
+        console.log(user.device.state);
+        if(user.device.state == "off") {
+            numInactiveUsers += 1;
+        } else {
+            numActiveUsers += 1;
+        }
+    });
+    // console.log("Active Users: " + numActiveUsers);
+    // console.log("Inactive Users: " + numInactiveUsers);
+    $(document).ready(function(){
+        $("#num-active-users").text(numActiveUsers);
+        $("#num-inactive-users").text(numInactiveUsers);
+        $("#num-total-users").text(numActiveUsers+numInactiveUsers);
     });
     console.log("USERS after updating: ");
     console.log(users);
@@ -180,10 +225,10 @@ var coordinates = {
     lat: parseFloat(40.805920),
     lon: parseFloat(-73.965749)
 };
-getDevicesAround(coordinates, 1000);
+getDevicesAround(coordinates, range);
 
 setInterval(function() {
-    getDevicesAround(coordinates, 1000)
+    getDevicesAround(coordinates, range)
 }, 1000);
 
 $(document).ready(function(){
@@ -196,8 +241,14 @@ $(document).ready(function(){
     });
 });
 
-
-
+$(document).ready(function(){
+    $("#btnSubmit").on('click', function(e){
+        e.preventDefault();
+        range = $("#range").val();
+        $("#range").val('');
+        $("#rangeText").text("Current Range: "+range+"m");
+    });
+});
 
 /**
  * Created by Kupletsky Sergey on 16.09.14.
