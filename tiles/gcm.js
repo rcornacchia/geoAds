@@ -52,24 +52,24 @@ module.exports = {
      {title, msg, url, id}
      @androidId -> string
     */
-    sendNotification: function(androidId, adObject) {
-        var gcmTokenPromise = getTokenById(androidId);
-        gcmTokenPromise.then(function(gcmToken) {
-            if (gcmToken) {
+    sendNotification: function(gcmId, adObject) {
+        // var gcmTokenPromise = getTokenById(androidId);
+        // gcmTokenPromise.then(function(gcmToken) {
+            // if (gcmToken) {
                 var message = new gcm.Message();
                 message.addData('title', adObject.title);
                 message.addData('msg', adObject.msg);
                 message.addData('url', adObject.url);
-                console.log(adObject.id);
+                // console.log(adObject.id);
                 message.addData('id', adObject.id);
-                sender.send(message, {registrationTokens: [gcmToken]}, function(err,response) {
+                sender.send(message, {registrationTokens: [gcmId]}, function(err,response) {
                     if (err) log("gcm sendNotification failed: " + err);
-                    else log(response);
+                    else log("gcm ad sent to :" + gcmId);
                 });
-            } else {
-                log("sendNotification failed: gcm token not found.");
-            }
-        });
+            // } else {
+            //     log("sendNotification failed: gcm token not found.");
+            // }
+        // });
     },
     /*
     broadcast notification to several android devices
