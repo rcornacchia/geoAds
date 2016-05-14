@@ -76,7 +76,7 @@ app.post('/rejectAd', function(req, res) {
 
     //Else if we keep ads in elasticsearch
     var updateParams = {
-        uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adData/' + adId + '/_update',
+        uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adCounters/' + adId + '/_update',
         method: 'POST',
         json: {
             script: "ctx._source.rejected += 1",
@@ -103,7 +103,7 @@ app.get('/redirect', function(req, res) {
 
     //or if we store on elasticSearch
     var updateParams = {
-        uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adData/' + adId + '/_update',
+        uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adCounters/' + adId + '/_update',
         method: 'POST',
         json: {
             script: "ctx._source.clicks += 1",
