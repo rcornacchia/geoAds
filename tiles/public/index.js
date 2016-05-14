@@ -60,7 +60,7 @@ function upsertDeviceMarker(devices) {
                 if (device.state == "off") {
                     icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
                 }
-                console.log(device);
+                // console.log(device);
                 var position_options = {
                     lat: parseFloat(device.location.lat),
                     lng: parseFloat(device.location.lon)
@@ -112,8 +112,8 @@ function upsertDeviceMarker(devices) {
         $("#num-inactive-users").text(numInactiveUsers);
         $("#num-total-users").text(numActiveUsers+numInactiveUsers);
     });
-    console.log("USERS after updating: ");
-    console.log(users);
+    // console.log("USERS after updating: ");
+    // console.log(users);
 }
 
 function updateMarker(userMarker) {
@@ -141,7 +141,7 @@ function createMarkers (data) {
             if (device.state == "off") {
                 icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
             }
-            console.log(device);
+            // console.log(device);
             var position_options = {
                 lat: parseFloat(device.location.lat),
                 lng: parseFloat(device.location.lon)
@@ -178,12 +178,12 @@ function getDevicesAround(center, radius) {
     $.post(uri, json2, function(data){
         var hits = [];
         obj = data;
-        console.log(data);
+        // console.log(data);
         for(var i=0; i<obj.hits.hits.length; i++){
             var device = obj.hits.hits[i]._source;
             hits.push(device);
         }
-        console.log(hits);
+        // console.log(hits);
         // add the markers to the map
         // mapDevices(hits);
         // createMarkers(hits);
@@ -234,8 +234,20 @@ setInterval(function() {
 $(document).ready(function(){
     $("#submitAd").on('click', function(e){
         e.preventDefault();
+        var title = $("#adTitle").val();
+        var discount = $("#discount").val();
+        var link = $("#link").val();
+        console.log(title);
+        console.log(discount);
+        console.log(link);
 
-        $.post('/targetedAd', {}, function(data){
+        var message = {
+            title: title,
+            discount: discount,
+            link: link
+        }
+
+        $.post('/targetedAd', message, function(data){
             mapusers(data);
         });
     });
