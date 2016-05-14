@@ -6,9 +6,9 @@ var range = "1000";
 var numActiveUsers;
 var numInactiveUsers;
 
-function upsertAdCounters(ads) {
-    console.log(ads);
-}
+// function upsertAdCounters(ads) {
+//     console.log(ads);
+// }
 
 function upsertDeviceMarker(devices) {
     // console.log("USERS:");
