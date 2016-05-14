@@ -246,6 +246,11 @@ $(document).ready(function(){
               }
             });
         });
+        var adText = title
+        $("#1-title").text(title);
+        $("#1-discount").text(discount + "%");
+        $("#1-link").text(link);
+
     });
 });
 
