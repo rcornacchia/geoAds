@@ -23,29 +23,52 @@ var range = "1000";
 //     // if any old users changed state
 // }
 
-function upsertDeviceMarker(userArray, object) {
-    if (userArray.length < 1) {
-        userArray.push(object);
-    } else {
+function upsertDeviceMarker(devices) {
+    console.log("USERS:");
+    console.log(users);
+    devices.forEach(function(device) {
         // obj.device.id is in the array
-        var deviceId = object.device.gcm;
-        userArray.forEach(function(arrayObj) {
+        var deviceId = device.gcm;
+        var found = false;
+        users.forEach(function(arrayObj) {
             if (arrayObj.device.gcm == deviceId) {
+                found = true;
                 var changed = false;
-                if (arrayObj.device.state != object.device.state) {
+                if (arrayObj.device.state != device.state) {
                     changed = true;
                     // update user array
-                    arrayObj.device = object.device;
+                    arrayObj.device = device;
                 }
-                if (arrayObj.device.location != object.device.location) {
+                if (arrayObj.device.location != device.location) {
                     changed = true;
                     // update user array
-                    arrayObj.device = object.device;
+                    arrayObj.device = device;
                 }
                 if (changed) updateMarker(arrayObj);
             }
         });
-    }
+        if (!found) {
+            if(!!device.location) {
+                var icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png";
+                if (device.state == "off") {
+                    icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
+                }
+                console.log(device);
+                var position_options = {
+                    lat: parseFloat(device.location.lat),
+                    lng: parseFloat(device.location.lon)
+                };
+                var marker = new google.maps.Marker({
+                    position: position_options,
+                    icon: icon,
+                    map: map
+                });
+                users.push({ device: device, marker: marker });
+            }
+        }
+    });
+    console.log("USERS after updating: ");
+    console.log(users);
 }
 
 function updateMarker(userMarker) {
@@ -60,8 +83,10 @@ function updateMarker(userMarker) {
         lat: parseFloat(device.location.lat),
         lng: parseFloat(device.location.lon)
     };
+
     var marker = userMarker.marker;
     marker.setPosition(position_options);
+    marker.setIcon(icon);
 }
 
 function createMarkers (data) {
@@ -81,11 +106,7 @@ function createMarkers (data) {
                 icon: icon,
                 map: map
             });
-            // users.push({ device: device, marker: marker });
-            upsertDeviceMarker(users, {
-                device: device,
-                marker: marker
-            });
+            users.push({ device: device, marker: marker });
         }
     });
 }
@@ -120,7 +141,8 @@ function getDevicesAround(center, radius) {
         console.log(hits);
         // add the markers to the map
         // mapDevices(hits);
-        createMarkers(hits);
+        // createMarkers(hits);
+        upsertDeviceMarker(hits);
     });
 }
 
@@ -159,6 +181,10 @@ var coordinates = {
     lon: parseFloat(-73.965749)
 };
 getDevicesAround(coordinates, 1000);
+
+setInterval(function() {
+    getDevicesAround(coordinates, 1000)
+}, 1000);
 
 $(document).ready(function(){
     $("#submitAd").on('click', function(e){
