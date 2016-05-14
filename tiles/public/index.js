@@ -6,32 +6,9 @@ var range = "1000";
 var numActiveUsers;
 var numInactiveUsers;
 
-
-// if user is no longer in array
-// then remove marker
-
-// GET array for the first time --> plot data
-// Get array every second --> check to see if there are any changes or new users
-//      if there are new users plot them and add to users array
-//      if there is a change, change the marker accordingly
-
-
-// function upsert(newData) {
-//     // if any new users present in newData not in users array already
-//     newData.foreach(function(newUser) {
-//         users.forEach(function(oldUser) {
-//             if (oldUser.gcm == newUser.gcm) {
-//
-//             }
-//         }
-//     })
-//
-//     // if any old users changed state
-// }
-
 function upsertDeviceMarker(devices) {
-    console.log("USERS:");
-    console.log(users);
+    // console.log("USERS:");
+    // console.log(users);
     devices.forEach(function(device) {
         // obj.device.id is in the array
         var deviceId = device.gcm;
@@ -89,7 +66,7 @@ function upsertDeviceMarker(devices) {
 
     users.forEach(function(user) {
         if(user.stillHere == false){
-            console.log("USER LEFT");
+            // console.log("USER LEFT");
             user.marker.setMap(null);
             var index = users.indexOf(user);
             users.splice(index, 1);
@@ -98,7 +75,7 @@ function upsertDeviceMarker(devices) {
     numActiveUsers = 0;
     numInactiveUsers = 0;
     users.forEach(function(user) {
-        console.log(user.device.state);
+        // console.log(user.device.state);
         if(user.device.state == "off") {
             numInactiveUsers += 1;
         } else {
@@ -237,18 +214,37 @@ $(document).ready(function(){
         var title = $("#adTitle").val();
         var discount = $("#discount").val();
         var link = $("#link").val();
-        console.log(title);
-        console.log(discount);
-        console.log(link);
+        // console.log(title);
+        // console.log(discount);
+        // console.log(link);
 
-        var message = {
+        var adObject = {
             title: title,
-            discount: discount,
-            link: link
-        }
+            msg: discount,
+            url: link,
+            id: ads.length + 1
+        };
 
-        $.post('/targetedAd', message, function(data){
-            mapusers(data);
+        ads.push(adObject);
+
+        // Also insert it into elasticSearch here
+
+        users.forEach(function(user) {
+            // $.post('/targetedAd', {ad: adObject, targetId: user.device.gcm}, function(data){
+            //     // mapusers(data);
+            //     console.log(data);
+            // });
+            console.log(user);
+            console.log(user.device.gcm);
+            $.ajax({
+              type: "POST",
+              url: '/targetedAd',
+              data: JSON.stringify({ad: adObject, targetId: user.device.gcm}),
+              headers: {'content-type' : 'application/json'},
+              success: function(data) {
+                  console.log(data);
+              }
+            });
         });
     });
 });
@@ -328,34 +324,3 @@ $(document).ready(function(){
         }).addClass("animate");
     })
 })(jQuery);
-
-
-
-// function mapDevices(devices) {
-//     devices.forEach(function(device) {
-//         console.log(device);
-//
-//         if(!!device.location) {
-//             var icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/green-dot.png";
-//             if (device.state == "off") {
-//                 icon = "http://maps.google.com/intl/en_us/mapfiles/ms/micons/purple-dot.png"
-//             }
-//             var position_options = {
-//                 lat: parseFloat(device.location.lat),
-//                 lng: parseFloat(device.location.lon)
-//             };
-//             console.log(position_options);
-//             var marker = new google.maps.Marker({
-//                 position : position_options,
-//                 icon: icon,
-//                 map: map
-//             });
-//             console.log(marker);
-//
-//             upsertDeviceMarker(users, {
-//                 device: device,
-//                 marker: marker
-//             });
-//         }
-//     });
-// }

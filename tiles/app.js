@@ -69,6 +69,7 @@ app.post('/broadcastAd', function(req, res) {
 app.post('/rejectAd', function(req, res) {
     var androidId = req.body.androidId;
     var adId = req.body.adId;
+    console.log("ad rejected: " + androidId + ', ' + adId);
 
     // If we keep array of ads in browser memory
     // emit on socket.io
