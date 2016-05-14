@@ -168,6 +168,20 @@ function getDevicesAround(center, radius) {
     });
 }
 
+function getAdCounts() {
+    var uri = 'https://search-adbrother-2mnwlo4oaulpldztks3rg362i4.us-east-1.es.amazonaws.com/adbrother/adData/_search';
+    $.get(uri, function(data) {
+        var hits = [];
+        obj = data;
+        for(var i=0; i<obj.hits.hits.length; i++){
+            var device = obj.hits.hits[i]._source;
+            hits.push(device);
+        }
+        // COUNTERS
+        upsertAdCounters(hits);
+    });
+}
+
 function initMap() {
     $(function(){
        $(".dropdown-menu li a").click(function(){
@@ -205,7 +219,8 @@ var coordinates = {
 getDevicesAround(coordinates, range);
 
 setInterval(function() {
-    getDevicesAround(coordinates, range)
+    getDevicesAround(coordinates, range);
+    getAdCounts();
 }, 1000);
 
 $(document).ready(function(){
@@ -227,7 +242,16 @@ $(document).ready(function(){
 
         ads.push(adObject);
 
+        // COUNTERS
         // Also insert it into elasticSearch here
+        $.post('https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adData/' + adId + '/_update',
+        {
+            doc: {
+                distributed: users.length
+            }
+        }, function(data) {
+            console.log("inserted into adData: " + data);
+        });
 
         users.forEach(function(user) {
             // $.post('/targetedAd', {ad: adObject, targetId: user.device.gcm}, function(data){
