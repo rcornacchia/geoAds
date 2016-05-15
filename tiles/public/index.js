@@ -16,6 +16,22 @@ socket.on('news', function (data) {
   socket.emit('my other event', { my: 'data' });
 });
 
+socket.on('accepted', function(data) {
+    console.log(data);
+    acceptedOffers += 1;
+    pendingOffers -= 1;
+    $("#pending-offers").text(pendingOffers);
+    $("#accepted-offers").text(acceptedOffers);
+});
+
+socket.on('rejected', function(data) {
+    console.log(data);
+    rejectedOffers += 1;
+    pendingOffers -= 1;
+    $("#pending-offers").text(pendingOffers);
+    $("#rejected-offers").text(rejectedOffers);
+});
+
 function upsertDeviceMarker(devices) {
     // console.log("USERS:");
     // console.log(users);

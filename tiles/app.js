@@ -88,6 +88,9 @@ app.post('/rejectAd', function(req, res) {
 
     // If we keep array of ads in browser memory
     // emit on socket.io
+    socket.emit('rejected', { action: 'rejected' });
+
+
 
     //Else if we keep ads in elasticsearch
     // var updateParams = {
@@ -115,6 +118,8 @@ app.get('/redirect', function(req, res) {
     var androidId = req.query.androidId;
 
     // Emit accepted ad on socket io
+    socket.emit('accepted', { action: 'accepted' });
+
 
     // //or if we store on elasticSearch
     // var updateParams = {
