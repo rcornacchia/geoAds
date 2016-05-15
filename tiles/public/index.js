@@ -26,16 +26,13 @@ socket.on('accepted', function(data) {
 });
 
 socket.on('rejected', function(data) {
-    if(odd = 0){
-        console.log(data);
-        rejectedOffers += 1;
+    console.log(data);
+    rejectedOffers += 1;
+    if(pendingOffers != 0) {
         pendingOffers -= 1;
-        $("#pending-offers").text(pendingOffers);
-        $("#rejected-offers").text(rejectedOffers);
-        odd +=1;
-    } else {
-        odd -= 1;
     }
+    $("#pending-offers").text(pendingOffers);
+    $("#rejected-offers").text(rejectedOffers);
 });
 
 function upsertDeviceMarker(devices) {
