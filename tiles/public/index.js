@@ -27,7 +27,9 @@ socket.on('accepted', function(data) {
 
 socket.on('rejected', function(data) {
     console.log(data);
-    rejectedOffers += 1;
+    if(rejectedOffers == 0) {
+        rejectedOffers += 1;
+    }
     if(pendingOffers != 0) {
         pendingOffers -= 1;
     }
