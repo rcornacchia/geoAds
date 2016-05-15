@@ -16,6 +16,7 @@ io.on('connection', function (socket) {
   socket.emit('news', { hello: 'world' });
   socket.on('my other event', function (data) {
     console.log(data);
+  });
 
 
 
@@ -143,7 +144,4 @@ app.get('/redirect', function(req, res) {
     // var link = req.query.link;
     res.redirect(link);
 });
-
-
-    });
 });
