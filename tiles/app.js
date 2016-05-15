@@ -91,23 +91,23 @@ app.post('/rejectAd', function(req, res) {
     // emit on socket.io
 
     //Else if we keep ads in elasticsearch
-    var updateParams = {
-        uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adCounters/' + adId + '/_update',
-        method: 'POST',
-        json: {
-            script: "ctx._source.rejected += 1",
-            upsert: {
-                "rejected" : 1
-            }
-        }
-    }
-    rp(updateParams)
-        .then(function(response) {
-            console.log("success: " + response);
-        })
-        .catch(function(error) {
-            console.log("rejectedAd failed: " + _error);
-        });
+    // var updateParams = {
+    //     uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adCounters/' + adId + '/_update',
+    //     method: 'POST',
+    //     json: {
+    //         script: "ctx._source.rejected += 1",
+    //         upsert: {
+    //             "rejected" : 1
+    //         }
+    //     }
+    // }
+    // rp(updateParams)
+    //     .then(function(response) {
+    //         console.log("success: " + response);
+    //     })
+    //     .catch(function(error) {
+    //         console.log("rejectedAd failed: " + _error);
+    //     });
 });
 
 app.get('/redirect', function(req, res) {
@@ -117,26 +117,26 @@ app.get('/redirect', function(req, res) {
 
     // Emit accepted ad on socket io
 
-    //or if we store on elasticSearch
-    var updateParams = {
-        uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adCounters/' + adId + '/_update',
-        method: 'POST',
-        json: {
-            script: "ctx._source.clicks += 1",
-            upsert: {
-                "clicks" : 1
-            }
-        }
-    }
-    rp(updateParams)
-        .then(function(response) {
-            console.log("success: " + response);
-        })
-        .catch(function(error) {
-            console.log("acceptedAd failed: " + _error);
-        });
-
-    // Redirect user
-    var link = req.query.link;
+    // //or if we store on elasticSearch
+    // var updateParams = {
+    //     uri: 'https://search-adbrother-omlt2jw6gse2qvjzhcppf5myka.us-east-1.es.amazonaws.com/adbrother/adCounters/' + adId + '/_update',
+    //     method: 'POST',
+    //     json: {
+    //         script: "ctx._source.clicks += 1",
+    //         upsert: {
+    //             "clicks" : 1
+    //         }
+    //     }
+    // }
+    // rp(updateParams)
+    //     .then(function(response) {
+    //         console.log("success: " + response);
+    //     })
+    //     .catch(function(error) {
+    //         console.log("acceptedAd failed: " + _error);
+    //     });
+    //
+    // // Redirect user
+    // var link = req.query.link;
     res.redirect(link);
 });
