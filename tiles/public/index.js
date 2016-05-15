@@ -6,10 +6,9 @@ var range = "1000";
 var numActiveUsers;
 var numInactiveUsers;
 var numAds = 0;
-
-// function upsertAdCounters(ads) {
-//     console.log(ads);
-// }
+var pendingOffers = 0;
+var acceptedOffers = 0;
+var rejectedOffers = 0;
 
 function upsertDeviceMarker(devices) {
     // console.log("USERS:");
@@ -280,6 +279,10 @@ $(document).ready(function(){
         $("#" + numAds + "-link").text(link);
         if (numAds == 8) numAds = 0;
 
+        pendingOffers += numActiveUsers;
+        $("#pending-offers").text(pendingOffers);
+        $("#accepted-offers").text(acceptedOffers);
+        $("#rejected-offers").text(rejectedOffers);
     });
 });
 
