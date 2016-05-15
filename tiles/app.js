@@ -4,11 +4,27 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
+var io = require('socket.io')(server);
 var elasticSearch = require('elasticsearch');
 var swig = require('swig');
 var path = require('path');
 var rp = require('request-promise');
 var gcm = require('./gcm.js');
+
+
+
+io.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
+});
+
+
+// io.emit('location_update', {location: req.body});
+
+
+
 
 // Get devices within radius in meters around center {lat, lon}
 function getDevicesAround(center, radius) {
