@@ -284,21 +284,23 @@ $(document).ready(function(){
         // });
 
         users.forEach(function(user) {
-            // $.post('/targetedAd', {ad: adObject, targetId: user.device.gcm}, function(data){
-            //     // mapusers(data);
-            //     console.log(data);
-            // });
-            console.log(user);
-            console.log(user.device.gcm);
-            $.ajax({
-              type: "POST",
-              url: '/targetedAd',
-              data: JSON.stringify({ad: adObject, targetId: user.device.gcm}),
-              headers: {'content-type' : 'application/json'},
-              success: function(data) {
-                  console.log(data);
-              }
-            });
+            if(user.device.state == "on") {
+                // $.post('/targetedAd', {ad: adObject, targetId: user.device.gcm}, function(data){
+                //     // mapusers(data);
+                //     console.log(data);
+                // });
+                console.log(user);
+                console.log(user.device.gcm);
+                $.ajax({
+                  type: "POST",
+                  url: '/targetedAd',
+                  data: JSON.stringify({ad: adObject, targetId: user.device.gcm}),
+                  headers: {'content-type' : 'application/json'},
+                  success: function(data) {
+                      console.log(data);
+                  }
+                });
+            }
         });
         var adText = title
         $("#" + numAds + "-title").text(title);
