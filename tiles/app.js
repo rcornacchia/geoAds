@@ -4,7 +4,6 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
-var io = require('socket.io')(server);
 var elasticSearch = require('elasticsearch');
 var swig = require('swig');
 var path = require('path');
