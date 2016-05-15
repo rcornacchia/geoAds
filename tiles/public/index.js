@@ -10,6 +10,12 @@ var pendingOffers = 0;
 var acceptedOffers = 0;
 var rejectedOffers = 0;
 
+var socket = io.connect('http://ec2-54-197-29-129.compute-1.amazonaws.com:8000/');
+socket.on('news', function (data) {
+  console.log(data);
+  socket.emit('my other event', { my: 'data' });
+});
+
 function upsertDeviceMarker(devices) {
     // console.log("USERS:");
     // console.log(users);
