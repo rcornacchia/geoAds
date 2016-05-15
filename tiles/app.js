@@ -142,5 +142,5 @@ app.get('/redirect', function(req, res) {
     //
     // // Redirect user
     // var link = req.query.link;
-    res.redirect(link);
+    // res.redirect(link);
 });
