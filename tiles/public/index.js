@@ -9,6 +9,7 @@ var numAds = 0;
 var pendingOffers = 0;
 var acceptedOffers = 0;
 var rejectedOffers = 0;
+var odd = 0;
 
 var socket = io.connect('http://ec2-54-197-29-129.compute-1.amazonaws.com:8000/');
 socket.on('news', function (data) {
@@ -25,11 +26,16 @@ socket.on('accepted', function(data) {
 });
 
 socket.on('rejected', function(data) {
-    console.log(data);
-    rejectedOffers += 1;
-    pendingOffers -= 1;
-    $("#pending-offers").text(pendingOffers);
-    $("#rejected-offers").text(rejectedOffers);
+    if(odd = 0){
+        console.log(data);
+        rejectedOffers += 1;
+        pendingOffers -= 1;
+        $("#pending-offers").text(pendingOffers);
+        $("#rejected-offers").text(rejectedOffers);
+        odd +=1;
+    } else {
+        odd -= 1;
+    }
 });
 
 function upsertDeviceMarker(devices) {
