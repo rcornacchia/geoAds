@@ -17,7 +17,7 @@ io.on('connection', function (socket) {
   socket.on('my other event', function (data) {
     console.log(data);
   });
-
+});
 
 
 // io.emit('location_update', {location: req.body});
@@ -88,7 +88,7 @@ app.post('/rejectAd', function(req, res) {
 
     // If we keep array of ads in browser memory
     // emit on socket.io
-    socket.emit('rejected', { action: 'rejected' });
+    io.emit('rejected', { action: 'rejected' });
 
 
 
@@ -118,7 +118,7 @@ app.get('/redirect', function(req, res) {
     var androidId = req.query.androidId;
 
     // Emit accepted ad on socket io
-    socket.emit('accepted', { action: 'accepted' });
+    io.emit('accepted', { action: 'accepted' });
 
 
     // //or if we store on elasticSearch
@@ -143,5 +143,4 @@ app.get('/redirect', function(req, res) {
     // // Redirect user
     // var link = req.query.link;
     res.redirect(link);
-});
 });
